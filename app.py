@@ -19,11 +19,101 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
 <style>
-    /* 深色赛博朋克背景 */
+    /* 深色赛博朋克背景 with 粒子效果 */
     .stApp {
         background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
         color: #e0e0e0;
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 粒子背景层 */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20% 30%, rgba(0, 245, 255, 0.3), transparent),
+            radial-gradient(2px 2px at 60% 70%, rgba(0, 255, 136, 0.3), transparent),
+            radial-gradient(1px 1px at 50% 50%, rgba(138, 43, 226, 0.3), transparent),
+            radial-gradient(1px 1px at 80% 10%, rgba(0, 245, 255, 0.4), transparent),
+            radial-gradient(2px 2px at 90% 60%, rgba(255, 107, 0, 0.3), transparent),
+            radial-gradient(1px 1px at 33% 85%, rgba(0, 255, 136, 0.3), transparent),
+            radial-gradient(1px 1px at 75% 40%, rgba(0, 245, 255, 0.3), transparent);
+        background-size: 200% 200%, 180% 180%, 220% 220%, 190% 190%, 210% 210%, 195% 195%, 205% 205%;
+        background-position: 0% 0%, 100% 0%, 50% 50%, 0% 100%, 100% 100%, 25% 25%, 75% 75%;
+        animation: particleFloat 20s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    /* 流星效果 */
+    .stApp::after {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background-image:
+            linear-gradient(90deg, transparent 0%, rgba(0, 245, 255, 0.8) 50%, transparent 100%);
+        background-size: 200px 2px;
+        background-repeat: no-repeat;
+        animation: meteor 15s linear infinite;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.3;
+    }
+    
+    @keyframes particleFloat {
+        0%, 100% {
+            background-position: 0% 0%, 100% 0%, 50% 50%, 0% 100%, 100% 100%, 25% 25%, 75% 75%;
+        }
+        50% {
+            background-position: 100% 100%, 0% 100%, 75% 75%, 100% 0%, 0% 0%, 75% 75%, 25% 25%;
+        }
+    }
+    
+    @keyframes meteor {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateX(50%) translateY(50%) rotate(45deg);
+            opacity: 0.3;
+        }
+        90% {
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(200%) translateY(200%) rotate(45deg);
+            opacity: 0;
+        }
+    }
+    
+    /* 确保内容在粒子层之上 */
+    .main .block-container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* 修复Streamlit容器高度问题 - 确保页面可见 */
+    html, body, #root, .stApp {
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+    
+    .main {
+        height: auto !important;
+        min-height: 100vh !important;
     }
     
     /* 移除全局 * 选择器，因为它会破坏 KaTeX 公式的字体渲染 */
@@ -79,11 +169,44 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
         transition: all 0.3s ease;
+        animation: pulse 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 245, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 10s linear infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.5), 0 0 70px rgba(0, 255, 136, 0.3);
+        }
+    }
+    
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
     
     .stat-box:hover {
-        transform: translateY(-5px);
+        transform: translateY(-5px) scale(1.02);
         box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5);
+        animation-play-state: paused;
     }
     
     .stat-label {
@@ -93,6 +216,8 @@ st.markdown("""
         letter-spacing: 2px;
         margin-bottom: 10px;
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        position: relative;
+        z-index: 1;
     }
     
     .stat-value {
@@ -101,6 +226,18 @@ st.markdown("""
         font-weight: bold;
         text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        position: relative;
+        z-index: 1;
+        animation: glow-value 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow-value {
+        from {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        to {
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 30px rgba(0, 245, 255, 0.4);
+        }
     }
     
     /* 问题容器 */
@@ -371,6 +508,9 @@ def render_latex(text):
     # 4. 将 \\boxed{} 转换为更好的显示格式
     text = re.sub(r'\\boxed\{([^}]+)\}', r'**[\1]**', text)
     
+    # 5. 将 \qquad 转换为可见的下划线，方便阅读填空题
+    text = text.replace(r'\qquad', ' ______ ')
+    
     return text
 
 def stream_text(text, placeholder, speed=0.01):
@@ -408,8 +548,8 @@ def stream_text(text, placeholder, speed=0.01):
 
 def main():
     # Title
-    st.markdown('<div class="main-title">⚡ AI-MATH REASONING</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">🚀 Powered by Llama-3.2-3B | SFT + GRPO Optimized</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">⚡ AI-MATH REASONING Demonstration</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">🚀 Powered by Llama-3.2-3B | Model Optimized via Two-Stage SFT + GRPO</div>', unsafe_allow_html=True)
     
     # 加载数据
     data = load_evaluation_data()
@@ -424,14 +564,17 @@ def main():
     if 'is_streaming' not in st.session_state:
         st.session_state.is_streaming = False
     
-    # 统计面板
+    # 使用完整的题目列表
+    filtered_results = data["detailed_results"]
+    
+    # 简化的统计面板 - 只显示题目总数和当前题号
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
     
     with col1:
         st.markdown(f'''
         <div class="stat-box">
-            <div class="stat-label">Total Questions</div>
+            <div class="stat-label">📚 Total Questions</div>
             <div class="stat-value">{data["total_questions"]}</div>
         </div>
         ''', unsafe_allow_html=True)
@@ -439,36 +582,18 @@ def main():
     with col2:
         st.markdown(f'''
         <div class="stat-box">
-            <div class="stat-label">Correct</div>
-            <div class="stat-value">{data["correct_answers"]}</div>
+            <div class="stat-label">📍 Current Question</div>
+            <div class="stat-value">#{st.session_state.current_index + 1}</div>
         </div>
         ''', unsafe_allow_html=True)
     
-    with col3:
-        accuracy = data["accuracy"] * 100
-        st.markdown(f'''
-        <div class="stat-box">
-            <div class="stat-label">Accuracy</div>
-            <div class="stat-value">{accuracy:.1f}%</div>
-        </div>
-        ''', unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f'''
-        <div class="stat-box">
-            <div class="stat-label">Current Index</div>
-            <div class="stat-value">{st.session_state.current_index + 1}</div>
-        </div>
-        ''', unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # 进度条
-    progress = (st.session_state.current_index + 1) / data["total_questions"] * 100
+    progress = (st.session_state.current_index + 1) / len(filtered_results) * 100 if filtered_results else 0
     st.markdown(f'''
     <div class="progress-container">
         <div style="color: #00f5ff; margin-bottom: 10px; text-align: center;">
-            Progress: {st.session_state.current_index + 1} / {data["total_questions"]}
+            Progress: {st.session_state.current_index + 1} / {len(filtered_results)}
         </div>
         <div style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
             <div class="progress-bar" style="width: {progress}%"></div>
@@ -476,8 +601,9 @@ def main():
     </div>
     ''', unsafe_allow_html=True)
     
+    
     # 获取当前题目
-    current_item = data["detailed_results"][st.session_state.current_index]
+    current_item = filtered_results[st.session_state.current_index]
     
     # 提取纯粹的问题（不包含 Assistant 回答）
     pure_question = extract_pure_question(current_item["question"])
@@ -510,7 +636,7 @@ def main():
             st.rerun()
     
     with col_btn3:
-        if st.button("⏭️ NEXT", disabled=st.session_state.current_index >= data["total_questions"] - 1):
+        if st.button("⏭️ NEXT", disabled=st.session_state.current_index >= len(filtered_results) - 1):
             st.session_state.current_index += 1
             st.session_state.is_streaming = False
             st.rerun()
@@ -524,7 +650,7 @@ def main():
     # AI 推理过程展示
     st.markdown(f'''
     <div class="reasoning-container">
-        <div class="reasoning-label">⚡ Reasoning Process</div>
+        <div class="reasoning-label">⚡ Model Reasoning Process</div>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -543,7 +669,7 @@ def main():
             
             if reasoning:
                 # 流式输出推理过程（支持 LaTeX 渲染）
-                stream_text(reasoning, reasoning_placeholder, speed=0.009)
+                stream_text(reasoning, reasoning_placeholder, speed=0.03)
             else:
                 reasoning_placeholder.markdown("*No reasoning generated by the model.*")
             
